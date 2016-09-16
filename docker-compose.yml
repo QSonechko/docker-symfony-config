@@ -1,0 +1,35 @@
+project_app:
+    container_name: project_app
+    image: busybox
+    volumes:
+        - ../app:/var/www/app/  # link project directory
+
+project_nginx:
+    container_name: project_nginx
+    build: builds/nginx
+    volumes_from:
+        - project_app
+    links:
+        - project_php:php
+    volumes:
+        - ./logs/nginx:/var/log/nginx
+
+project_php:
+    container_name: project_php
+    build: builds/php-fpm
+    volumes_from:
+        - project_app
+    links:
+        - project_mysql:mysql
+    working_dir: /var/www/app
+
+project_mysql:
+    container_name: project_mysql
+    image: mysql:5.6
+    volumes:
+        - ./mysql:/var/lib/mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: db
+        MYSQL_USER: root
+        MYSQL_PASSWORD: root
